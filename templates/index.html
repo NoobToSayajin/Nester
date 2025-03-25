@@ -1,0 +1,84 @@
+
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Seahawks Nester</title>
+        <style>
+            .refresh-button {
+                padding: 10px 20px;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+            }
+            .refresh-button:hover {
+                background-color: #45a049;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            th, td {
+                padding: 10px;
+                text-align: left;
+                border: 1px solid #ddd;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+            pre {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Résultats des scans</h1>
+        <button class="refresh-button" onclick="refreshPage()">Actualiser</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Franchise ID</th>
+                    <th>IP Address</th>
+                    <th>Connected Devices</th>
+                    <th>Latency</th>
+                    <th>Scan Data</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in results %}
+                <tr>
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                    <td>{{ row[3] }}</td>
+                    <td>{{ row[4] }}</td>
+                    <td>
+                        <pre>
+                            {% if row[5] %}
+                                {{ row[5] | tojson(indent=4) }}
+                            {% else %}
+                                Aucune donnée de scan
+                            {% endif %}
+                        </pre>
+                    </td>
+                    <td>{{ row[6] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <script>
+            function refreshPage() {
+                window.location.reload();
+            }
+        </script>
+    </body>
+    </html>
+    
