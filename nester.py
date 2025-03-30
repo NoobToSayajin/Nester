@@ -248,4 +248,4 @@ if __name__ == '__main__':
     create_html_template()
 
     # Démarrer l'application Flask
-    app.run(host='10.2.0.105', port=80, debug=True)
+    app.run(host='10.2.0.105', port=5000, debug=True)
