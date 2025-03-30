@@ -13,7 +13,7 @@ else
         # Si le repertoire existe, mise a jour du depot
         echo "Le répertoire existe. Mise à jour du dépôt..."
         cd "$PROJECT_DIR"
-        git pull mspr main
+        git pull origin main
 fi
 
 # Vérifier si l'environnement virtuel existe
