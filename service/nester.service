@@ -1,0 +1,13 @@
+[Unit]
+Description=Application Nester du MSPR 6.1
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/start_nester.sh
+WorkingDirectory=/usr/local/bin/nester
+Restart=always
+User=nobody
+Environment="PATH=/usr/local/bin/python3.13:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+[Install]
+WantedBy=multi-user.target
