@@ -77,22 +77,33 @@ def receive_data():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # Route pour afficher les données dans l'interface web
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    """Affiche les résultats des scans dans l'interface web."""
+    """Affiche les résultats des scans dans l'interface web avec possibilité de recherche."""
+    search_query = request.form.get('search', '').strip()
+    
     try:
         with sqlite3.connect(DATABASE) as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM scan_results ORDER BY timestamp DESC')
+            if search_query:
+                # Recherche dans franchise_id, ip_address et scan_data
+                cursor.execute('''
+                    SELECT * FROM scan_results 
+                    WHERE franchise_id LIKE ? OR 
+                          ip_address LIKE ? OR 
+                          scan_data LIKE ?
+                    ORDER BY timestamp DESC
+                ''', (f'%{search_query}%', f'%{search_query}%', f'%{search_query}%'))
+            else:
+                cursor.execute('SELECT * FROM scan_results ORDER BY timestamp DESC')
             results = cursor.fetchall()
-            print("Résultats de la base de données :", results)  # Affiche les résultats dans la console Flask
-            return render_template('index.html', results=results)
+            return render_template('index.html', results=results, search_query=search_query)
     except sqlite3.Error as e:
         return f"Erreur de base de données : {str(e)}", 500
 
 # Création du fichier HTML pour l'interface web (à exécuter une seule fois)
 def create_html_template():
-    """Crée le fichier HTML pour l'interface web."""
+    """Crée le fichier HTML pour l'interface web avec fonctionnalité de recherche."""
     if not os.path.exists('templates'):
         os.makedirs('templates')
 
@@ -112,9 +123,45 @@ def create_html_template():
                 border-radius: 5px;
                 cursor: pointer;
                 font-size: 16px;
+                margin-right: 10px;
             }
-            .refresh-button:hover {
-                background-color: #45a049;
+            .search-container {
+                margin: 20px 0;
+                display: flex;
+                align-items: center;
+            }
+            .search-input {
+                padding: 10px;
+                width: 300px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-size: 16px;
+            }
+            .search-button {
+                padding: 10px 20px;
+                background-color: #2196F3;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-left: 10px;
+            }
+            .search-button:hover {
+                background-color: #0b7dda;
+            }
+            .reset-button {
+                padding: 10px 20px;
+                background-color: #f44336;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-left: 10px;
+            }
+            .reset-button:hover {
+                background-color: #da190b;
             }
             table {
                 width: 100%;
@@ -137,7 +184,14 @@ def create_html_template():
     </head>
     <body>
         <h1>Résultats des scans</h1>
-        <button class="refresh-button" onclick="refreshPage()">Actualiser</button>
+        <div class="search-container">
+            <form method="POST" action="/">
+                <input type="text" name="search" class="search-input" placeholder="Rechercher..." value="{{ search_query }}">
+                <button type="submit" class="search-button">Rechercher</button>
+                <button type="button" class="reset-button" onclick="resetSearch()">Réinitialiser</button>
+            </form>
+            <button class="refresh-button" onclick="refreshPage()">Actualiser</button>
+        </div>
         <table>
             <thead>
                 <tr>
@@ -176,6 +230,10 @@ def create_html_template():
             function refreshPage() {
                 window.location.reload();
             }
+            
+            function resetSearch() {
+                window.location.href = '/';
+            }
         </script>
     </body>
     </html>
@@ -190,4 +248,4 @@ if __name__ == '__main__':
     create_html_template()
 
     # Démarrer l'application Flask
-    app.run(host='192.168.40.131', port=5000, debug=True)  # Activez le mode debug pour plus de logs
+    app.run(host='10.2.0.105', port=5000, debug=True)
